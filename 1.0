@@ -1,0 +1,96 @@
+-- contem bastantes coisas que precisam ser mudadas(praticamente tudo ;-;) esse parte foi feita so pra ter uma base--
+
+for _, v in next, {'AutoShaman', 'AutoNewGame', 'AutoTimeLeft', 'PhysicalConsumables','AfkDeath','AutoScore'} do
+    tfm.exec['disable' .. v]()
+end
+
+data = {}
+
+magia1 = {
+img = "18f7d24ec87.png",
+dano = 5,
+gasto = 10 } 
+ 
+magia2 = {
+img = "18f7d251b6b.png",
+dano = 30 }
+
+function eventNewPlayer(name)
+data[name] = {
+life = 100,
+carregando = false,
+olhandoD = true,
+ataque = nil,
+carregado = 0
+
+}
+
+status(name)
+system.bindKeyboard(name,32,false,true)
+system.bindKeyboard(name,32,true,true)
+system.bindKeyboard(name,65,true,true)
+system.bindKeyboard(name,68,true,true)
+system.bindKeyboard(name,37,true,true)
+system.bindKeyboard(name,39,true,true)
+system.bindKeyboard(name,70,true,true)
+system.bindKeyboard(name,90,true,true)
+system.bindKeyboard(name,88,true,true)
+system.bindKeyboard(name,67,true,true)
+
+ 		-- Tecla Espaço --
+end
+
+function status(name)
+ui.addTextArea(0,"",name,6,28,200,16,0x930000,0x930000,1,true)
+ui.addTextArea(1,"",name,6,28,math.floor(data[name].life*2),16,0xFF0000,0xFF0000,70,true)
+ui.addTextArea(2,"<p align='center'><font color='#FFFFFF'>"..data[name].life.."/100",name,6,28,200,16,0,0,0,true)
+
+ui.addTextArea(6,"",name,6,60,200,16,0x322F2C,0x322F2C,1,true)
+ui.addTextArea(7,"",name,6,60,math.floor(data[name].carregado*2),16,0xE6FF00,0x000000,70,true)
+ui.addTextArea(8,"<p align='center'><font color='#FFFFFF'>"..data[name].carregado.."/100",name,6,60,200,16,0,0,0,true)
+
+ui.addTextArea(9, "", name, 6, 354, 35, 35, 0x50505, 0xFF0000, 1, true)
+
+tfm.exec.addImage("18f7d24ec87.png", "&9", 6, 354, name, 0.5, 0.5, 0.00, 1, 0, 0, true)
+                                
+end
+
+for name,player in pairs(tfm.get.room.playerList) do
+eventNewPlayer(name)
+end
+
+function eventKeyboard(name,key,down,x,y)
+if key == 32 and not tfm.get.room.playerList[name].isDead and down then
+ data[name].carregando = true
+ print(data[name].carregado)
+elseif key == 32 and not down then
+ data[name].carregando = false
+  print(data[name].carregado)
+end
+if key == 70 and not data[name].carregando and data[name].carregado >= magia1.gasto then
+data[name].carregado = data[name].carregado - magia1.gasto
+status(name)
+data[magia1] = tfm.exec.addShamanObject(1, x+70, y, 0, 30, 0, false, {contactListener = true} )
+tfm.exec.addImage(magia1.img, "#"..data[magia1], -21,-30)
+end
+end
+
+function eventLoop()
+for name,player in pairs(tfm.get.room.playerList) do
+if data[name].carregando  == true and data[name].carregado < 100 then
+data[name].carregado = data[name].carregado + 5
+print(data[name].carregado)
+status(name)            
+
+end
+end
+end
+
+function eventContactListener(name,id,info)
+data[name].hit = tfm.exec.addImage("18f7d24bda6.png", "$"..name, -65,-65)
+tfm.exec.removeImage(data[name].hit,true)
+tfm.exec.removeObject(id)
+if id == data[magia1] then 
+print(0)
+end
+end
